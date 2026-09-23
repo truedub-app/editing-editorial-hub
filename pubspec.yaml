@@ -1,0 +1,61 @@
+name: editing_editorial_hub
+description: "Editing & Editorial Hub — offline department rota, work manual, contacts and blacklist."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State management
+  provider: ^6.1.5
+
+  # Routing / responsive navigation
+  go_router: ^18.0.1
+
+  # Local database
+  drift: ^2.35.0
+  sqlite3: ^3.6.0
+  path_provider: ^2.1.6
+  path: ^1.9.1
+
+  # Excel ROTA import
+  excel: ^4.0.6
+  file_picker: ^13.1.0
+
+  # Work manual readers
+  pdfx: ^2.11.0
+  media_kit: ^1.2.6
+  media_kit_video: ^2.0.1
+  media_kit_libs_video: ^1.0.7
+
+  # Security: PIN / biometric lock, secure key storage, field-level encryption
+  local_auth: ^3.0.2
+  flutter_secure_storage: ^11.2.0
+  cryptography: ^2.9.0
+
+  # Backup package (.hub)
+  archive: ^3.6.1
+
+  # Contacts actions
+  url_launcher: ^6.3.2
+  share_plus: ^13.3.0
+
+  # Formatting
+  intl: ^0.20.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  drift_dev: ^2.35.0
+  build_runner: ^2.16.1
+
+flutter:
+  uses-material-design: true
