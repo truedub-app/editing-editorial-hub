@@ -18,18 +18,18 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Offline department hub for Editing & Editorial: ROTA, work manual, contacts and blacklist.">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="editing_editorial_hub">
+  <meta name="apple-mobile-web-app-title" content="EE Hub">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>editing_editorial_hub</title>
+  <title>Editing & Editorial Hub</title>
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
@@ -42,5 +42,17 @@
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
   <script src="flutter_bootstrap.js" async></script>
+  <script>
+    // Flutter's own service-worker auto-loader only *maintains* an existing
+    // registration — it never installs a fresh one, so a first-time visitor
+    // never gets offline caching. Register it directly instead, so the app
+    // shell (and, after one online visit, the whole thing) works with no
+    // network connection afterward.
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('flutter_service_worker.js');
+      });
+    }
+  </script>
 </body>
 </html>
