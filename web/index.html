@@ -49,9 +49,7 @@
     // shell (and, after one online visit, the whole thing) works with no
     // network connection afterward.
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('flutter_service_worker.js');
-      });
+      navigator.serviceWorker.register('flutter_service_worker.js');
     }
   </script>
 </body>

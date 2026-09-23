@@ -8,6 +8,7 @@ class ParsedRotaCell {
     this.hoursStart,
     this.hoursEnd,
     this.qc2Duty = false,
+    this.inCharge = false,
     this.rawText,
   });
 
@@ -16,6 +17,11 @@ class ParsedRotaCell {
   final String? hoursStart;
   final String? hoursEnd;
   final bool qc2Duty;
+  /// Derived from the cell's fill color: the source file marks the day's
+  /// in-charge person with a solid yellow (`FFFFFF00`) fill, one per
+  /// section per day — verified against the real file (spec has no such
+  /// column; this is how the department actually records it).
+  final bool inCharge;
   final String? rawText;
 }
 
@@ -59,6 +65,15 @@ class ParsedRotaImport {
       sections.expand((s) => s.rows.map((r) => r.staffName.trim().toLowerCase())).toSet().length;
 
   int get dayCount => sections.expand((s) => s.dates).map((d) => d.toIso8601String().split('T').first).toSet().length;
+
+  int get inChargeCellCount => sections
+      .expand((s) => s.rows)
+      .expand((r) => r.cells)
+      .where((c) => c != null && c.inCharge)
+      .length;
+
+  int get qc2CellCount =>
+      sections.expand((s) => s.rows).expand((r) => r.cells).where((c) => c != null && c.qc2Duty).length;
 }
 
 /// Parses the department's real monthly ROTA workbook.
@@ -71,6 +86,7 @@ class ParsedRotaImport {
 /// "\xa0\xa0 OFF", "missing list &\nQC 2 ", "Holiday ", "toil ".
 class RotaExcelParser {
   static const _sectionHeaderKeywords = ['shift', 'holiday'];
+  static const _inChargeFillHex = 'FFFFFF00';
 
   static final _dateRegex = RegExp(r'(\d{1,2})\D{0,3}(\d{1,2})\D{0,3}(\d{4})');
   static final _hoursRegex = RegExp(r'(\d{1,2})\D{0,2}(\d{2})?\D+(\d{1,2})\D{0,2}(\d{2})?');
@@ -128,7 +144,8 @@ class RotaExcelParser {
           final cells = <ParsedRotaCell?>[];
           for (var c = 0; c < dates.length; c++) {
             final raw = _cellText(sheet, c + 1, sr);
-            final parsed = _parseCell(raw, sectionName);
+            final isInCharge = _cellFillHex(sheet, c + 1, sr) == _inChargeFillHex;
+            final parsed = _parseCell(raw, sectionName, isInCharge);
             if (raw != null && raw.trim().isNotEmpty) {
               cellsProcessed++;
               if (parsed == null) {
@@ -183,6 +200,13 @@ class RotaExcelParser {
     return value.toString();
   }
 
+  String? _cellFillHex(Sheet sheet, int col, int row) {
+    if (row >= sheet.maxRows) return null;
+    final rowData = sheet.row(row);
+    if (col >= rowData.length) return null;
+    return rowData[col]?.cellStyle?.backgroundColor.colorHex.toUpperCase();
+  }
+
   String _cleanText(String text) {
     return text.replaceAll(' ', ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
   }
@@ -198,7 +222,7 @@ class RotaExcelParser {
     return DateTime(year, month, day);
   }
 
-  ParsedRotaCell? _parseCell(String? raw, String sectionName) {
+  ParsedRotaCell? _parseCell(String? raw, String sectionName, bool isInCharge) {
     if (raw == null) return null;
     final clean = _cleanText(raw);
     if (clean.isEmpty) return null;
@@ -212,6 +236,7 @@ class RotaExcelParser {
         hoursStart: band?.start,
         hoursEnd: band?.end,
         qc2Duty: true,
+        inCharge: isInCharge,
         rawText: clean,
       );
     }
@@ -241,6 +266,7 @@ class RotaExcelParser {
           status: 'Working',
           hoursStart: start,
           hoursEnd: end,
+          inCharge: isInCharge,
           rawText: clean,
         );
       }

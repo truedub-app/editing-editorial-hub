@@ -146,6 +146,9 @@ class _ImportRotaScreenState extends State<ImportRotaScreen> {
                       AppColors.warningOrange),
                 _summaryLine('✓', '${preview.dayCount} schedule days found', AppColors.qc2Green),
                 _summaryLine('✓', '${preview.cellsProcessed} shift cells processed', AppColors.qc2Green),
+                _summaryLine('✓', '${preview.inChargeCellCount} in-charge assignments detected (yellow cells)',
+                    AppColors.inChargeYellow),
+                _summaryLine('✓', '${preview.qc2CellCount} QC 2 / missing-list duties detected', AppColors.qc2Green),
                 if (preview.warnings.isNotEmpty)
                   _summaryLine('⚠', '${preview.warnings.length} warning(s)', AppColors.warningOrange),
               ],

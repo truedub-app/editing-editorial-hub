@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:provider/provider.dart';
 
-import 'app/auth_gate.dart';
 import 'app/router/app_router.dart';
 import 'app/theme/app_theme.dart';
 import 'data/database/app_database.dart';
@@ -13,8 +12,8 @@ import 'data/repositories/rota_repository.dart';
 import 'data/repositories/staff_repository.dart';
 import 'data/repositories/system_repository.dart';
 import 'data/seed_data.dart';
-import 'services/auth_service.dart';
 import 'services/backup_service.dart';
+import 'services/data_key_service.dart';
 import 'services/excel_import_service.dart';
 
 void main() {
@@ -32,16 +31,16 @@ class AppRoot extends StatefulWidget {
 
 class _AppRootState extends State<AppRoot> {
   late final AppDatabase _db;
-  late final AuthService _authService;
+  late final DataKeyService _dataKeyService;
   late final Future<void> _initialization;
 
   @override
   void initState() {
     super.initState();
     _db = AppDatabase();
-    _authService = AuthService();
+    _dataKeyService = DataKeyService();
     _initialization = Future.wait([
-      _authService.bootstrap(),
+      _dataKeyService.bootstrap(),
       seedIfNeeded(_db),
     ]);
   }
@@ -79,7 +78,7 @@ class _AppRootState extends State<AppRoot> {
 
         return MultiProvider(
           providers: [
-            ChangeNotifierProvider<AuthService>.value(value: _authService),
+            ChangeNotifierProvider<DataKeyService>.value(value: _dataKeyService),
             Provider<AppDatabase>.value(value: _db),
             Provider<StaffRepository>.value(value: staffRepository),
             Provider<RotaRepository>.value(value: rotaRepository),
@@ -97,7 +96,6 @@ class _AppRootState extends State<AppRoot> {
             darkTheme: AppTheme.dark,
             themeMode: ThemeMode.dark,
             routerConfig: appRouter,
-            builder: (context, routerChild) => AuthGate(child: routerChild ?? const SizedBox.shrink()),
           ),
         );
       },

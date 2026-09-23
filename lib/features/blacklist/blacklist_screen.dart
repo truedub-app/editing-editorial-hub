@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../../app/theme/app_colors.dart';
 import '../../data/database/app_database.dart';
 import '../../data/repositories/blacklist_repository.dart';
-import '../../services/auth_service.dart';
+import '../../services/data_key_service.dart';
 
 const _categories = ['Actors', 'Journalists', 'Presenters', 'Contributors', 'Other'];
 
@@ -107,7 +107,7 @@ class _BlacklistScreenState extends State<BlacklistScreen> {
     var category = _category ?? _categories.first;
     var status = 'Editorial review required';
     final repo = context.read<BlacklistRepository>();
-    final auth = context.read<AuthService>();
+    final dataKeyService = context.read<DataKeyService>();
 
     await showDialog<void>(
       context: context,
@@ -164,7 +164,7 @@ class _BlacklistScreenState extends State<BlacklistScreen> {
                   programs: programsCtrl.text.trim().isEmpty ? null : programsCtrl.text.trim(),
                   reasonPlain: reasonCtrl.text.trim().isEmpty ? null : reasonCtrl.text.trim(),
                   sourcePlain: sourceCtrl.text.trim().isEmpty ? null : sourceCtrl.text.trim(),
-                  key: auth.dataKey,
+                  key: dataKeyService.dataKey,
                   actor: 'Local admin',
                 );
                 if (context.mounted) Navigator.pop(context);
@@ -200,8 +200,8 @@ class _BlacklistCard extends StatelessWidget {
 
   Future<void> _showDetail(BuildContext context) async {
     final repo = context.read<BlacklistRepository>();
-    final auth = context.read<AuthService>();
-    final key = auth.dataKey;
+    final dataKeyService = context.read<DataKeyService>();
+    final key = dataKeyService.dataKey;
     Map<String, String?> fields = {};
     if (key != null) {
       fields = await repo.readSensitiveFields(entry, key, actor: 'Local admin');

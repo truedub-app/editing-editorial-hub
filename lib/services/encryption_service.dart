@@ -5,7 +5,7 @@ import 'package:cryptography/cryptography.dart';
 
 /// AES-256-GCM helpers for field-level encryption of sensitive text (used
 /// for blacklist reason/source/notes and contact notes). Callers hold a
-/// [SecretKey] obtained from [AuthService] while the app is unlocked.
+/// [SecretKey] obtained from [DataKeyService].
 ///
 /// This is deliberately *not* whole-database encryption (see the project
 /// plan for why SQLCipher on Windows desktop FFI was judged too risky to

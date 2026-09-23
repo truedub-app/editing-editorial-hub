@@ -28,6 +28,8 @@ class ImportPreview {
   int get staffNewCount => unknownNames.length;
   int get dayCount => parsed.dayCount;
   int get cellsProcessed => parsed.cellsProcessed;
+  int get inChargeCellCount => parsed.inChargeCellCount;
+  int get qc2CellCount => parsed.qc2CellCount;
   List<String> get warnings => parsed.warnings;
 }
 
@@ -122,7 +124,21 @@ class ExcelImportService {
     );
 
     final rows = <RotaAssignmentCompanion>[];
-    final qc2ToSet = <(DateTime, String, int)>[];
+    // Keyed by "date|section" so an in-charge cell and a QC2 cell for the
+    // same band (different people, different cells) merge into one duty
+    // record instead of clobbering each other.
+    final dutyUpdates = <String, ({DateTime date, String section, int? inCharge, int? qc2})>{};
+
+    void mergeDuty(DateTime date, String section, {int? inCharge, int? qc2}) {
+      final key = '${date.toIso8601String()}|$section';
+      final existing = dutyUpdates[key];
+      dutyUpdates[key] = (
+        date: date,
+        section: section,
+        inCharge: inCharge ?? existing?.inCharge,
+        qc2: qc2 ?? existing?.qc2,
+      );
+    }
 
     for (final section in preview.parsed.sections) {
       for (final row in section.rows) {
@@ -143,7 +159,10 @@ class ExcelImportService {
             sourceImportId: Value(importId),
           ));
           if (cell.qc2Duty) {
-            qc2ToSet.add((date, section.sectionName, staffId));
+            mergeDuty(date, section.sectionName, qc2: staffId);
+          }
+          if (cell.inCharge) {
+            mergeDuty(date, section.sectionName, inCharge: staffId);
           }
         }
       }
@@ -151,13 +170,13 @@ class ExcelImportService {
 
     await _rotaRepository.bulkUpsert(rows);
 
-    for (final (date, sectionName, staffId) in qc2ToSet) {
-      final existing = await _rotaRepository.dutyFor(date, sectionName);
+    for (final update in dutyUpdates.values) {
+      final existing = await _rotaRepository.dutyFor(update.date, update.section);
       await _rotaRepository.upsertDuty(
-        date: date,
-        section: sectionName,
-        inChargeStaffId: existing?.inChargeStaffId,
-        qc2StaffId: staffId,
+        date: update.date,
+        section: update.section,
+        inChargeStaffId: update.inCharge ?? existing?.inChargeStaffId,
+        qc2StaffId: update.qc2 ?? existing?.qc2StaffId,
       );
     }
 

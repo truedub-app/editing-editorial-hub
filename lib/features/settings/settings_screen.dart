@@ -11,7 +11,6 @@ import '../../data/repositories/contacts_repository.dart';
 import '../../data/repositories/manual_repository.dart';
 import '../../data/repositories/staff_repository.dart';
 import '../../data/repositories/system_repository.dart';
-import '../../services/auth_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -66,18 +65,6 @@ class SettingsScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: _StatusPanel(),
-            ),
-          ),
-          const SizedBox(height: 20),
-          _SectionLabel('Security'),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.lock_outline),
-              title: const Text('Lock app now'),
-              onTap: () {
-                context.read<AuthService>().lock();
-                context.go('/home');
-              },
             ),
           ),
         ],

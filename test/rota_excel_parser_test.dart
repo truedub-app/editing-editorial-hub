@@ -31,6 +31,11 @@ List<int> _buildSampleWorkbook() {
     TextCellValue('toil '),
   ]);
 
+  // Mark Staffer A's Sun-13 cell as that day's in-charge person, the way
+  // the real file does: a solid yellow fill, nothing else distinguishing it.
+  sheet.cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: 1)).cellStyle =
+      CellStyle(backgroundColorHex: ExcelColor.fromHexString('FFFFFF00'));
+
   sheet.appendRow([TextCellValue('')]);
 
   sheet.appendRow([
@@ -67,14 +72,17 @@ void main() {
     expect(staffA.cells[0]!.code, 'M');
     expect(staffA.cells[0]!.hoursStart, '08:00');
     expect(staffA.cells[0]!.hoursEnd, '16:00');
+    expect(staffA.cells[0]!.inCharge, isTrue);
     expect(staffA.cells[1]!.status, 'OFF');
     expect(staffA.cells[2]!.qc2Duty, isTrue);
     // QC2 duty falls in the Morning section, so hours are inferred as 08-16.
     expect(staffA.cells[2]!.hoursStart, '08:00');
+    expect(staffA.cells[2]!.inCharge, isFalse);
 
     final staffB = morning.rows.firstWhere((r) => r.staffName == 'Test Staffer B');
     expect(staffB.cells[0]!.status, 'HOL');
     expect(staffB.cells[2]!.status, 'TOIL');
+    expect(staffB.cells[1]!.inCharge, isFalse);
 
     final afternoon = sheetResult.sections.firstWhere((s) => s.sectionName == 'Afternoon');
     final staffC = afternoon.rows.single;
@@ -86,5 +94,7 @@ void main() {
 
     expect(sheetResult.staffCount, 3);
     expect(sheetResult.dayCount, 3);
+    expect(sheetResult.inChargeCellCount, 1);
+    expect(sheetResult.qc2CellCount, 1);
   });
 }

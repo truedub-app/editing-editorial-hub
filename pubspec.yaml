@@ -35,8 +35,7 @@ dependencies:
   media_kit_video: ^2.0.1
   media_kit_libs_video: ^1.0.7
 
-  # Security: PIN / biometric lock, secure key storage, field-level encryption
-  local_auth: ^3.0.2
+  # Secure key storage + field-level encryption for sensitive data
   flutter_secure_storage: ^11.2.0
   cryptography: ^2.9.0
 
