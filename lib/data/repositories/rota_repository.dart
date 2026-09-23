@@ -119,7 +119,7 @@ class RotaRepository {
     final rows = await _db.customSelect(
       'SELECT DISTINCT section FROM rota_assignment',
     ).get();
-    final found = rows.map((r) => r.data['section'] as String).toSet();
+    final found = rows.map((r) => r.data['section'].toString()).toSet();
     return [
       ...order.where(found.contains),
       ...found.where((s) => !order.contains(s)),
